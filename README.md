@@ -1,7 +1,7 @@
 # SanBeiTypeWriter
 扇贝阅读打字记忆单词
 
-请将SanBei.user.js里面的内容复制到油猴脚本中使用
+请将SanBeiTypeWriter.user.js里面的内容复制到油猴脚本中使用
 
 按键声音请在sound_switch中设置,为true 或false
 
@@ -14,4 +14,5 @@
 目前只识别对的字符(我觉得挺好的哈哈,打错了也不会很难受)
 
 ![show.png](./show.png)
+
 (展示图片,怕侵权哈,打个码)
