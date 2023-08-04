@@ -1,6 +1,8 @@
 # SanBeiTypeWriter
 扇贝阅读打字记忆单词
 
+请将SanBei.user.js里面的内容复制到油猴脚本中使用
+
 可打字的单词会变蓝色
 
 输入的字符会变成红色
