@@ -3,6 +3,8 @@
 
 请将SanBei.user.js里面的内容复制到油猴脚本中使用
 
+按键声音请在sound_switch中设置,为true 或false
+
 可打字的单词会变蓝色
 
 输入的字符会变成红色

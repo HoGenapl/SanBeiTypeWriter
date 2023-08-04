@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SanBeiTypeWriter
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  扇贝阅读打字记忆
 // @author       Hogen
 // @match        https://web.shanbay.com/reading/web-news/articles/*
@@ -9,11 +9,24 @@
 // @grant        none
 // @run-at document-end
 // ==/UserScript==
+//设置
+//1.打字声音是否开启
+var sound_switch = true;
+
 
 //转换完的字符标签
 var cc;
 //当前的字符指针位置
 var cc_p=0;
+//设置打字音
+//添加音频文件1
+const click = new Audio("https://raw.githubusercontent.com/HoGenapl/SanBeiTypeWriter/main/click.wav");
+//click.loop = true;
+click.type = "audio/wav";
+//添加音频文件2
+const click2 = new Audio("https://raw.githubusercontent.com/HoGenapl/SanBeiTypeWriter/main/beep.wav");
+//click.loop = true;
+click2.type = "audio/wav";
 //禁止空格下滑页面
 document.body.onkeydown = function (event) {
     var e = window.event || event;
@@ -25,6 +38,11 @@ document.body.onkeydown = function (event) {
 }
 //绑定按键
 document.body.addEventListener("keydown",function(e){
+    //播放按键声音
+    if(sound_switch == true)
+    {
+        click.play();
+    }
     console.log(cc_p <= cc.length,"__",e.keyCode,"__",cc[cc_p].innerText.toUpperCase().charCodeAt(0))
     var kd = e.keyCode
     //转换单引号
@@ -35,9 +53,11 @@ document.body.addEventListener("keydown",function(e){
     if((cc_p <= cc.length) && (kd == cc[cc_p].innerText.toUpperCase().charCodeAt(0)))
     {
         cc[cc_p].style.color="red";
-
         cc_p = cc_p + 1;
-
+    }
+    else if(sound_switch == true)//如果按错了播放提示音
+    {
+        click2.play();
     }
     console.log(cc_p,"__",cc.length);
 
