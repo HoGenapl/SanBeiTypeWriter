@@ -28,14 +28,11 @@ const click2 = new Audio("https://raw.githubusercontent.com/HoGenapl/SanBeiTypeW
 //click.loop = true;
 click2.type = "audio/wav";
 //禁止空格下滑页面
-document.body.onkeydown = function (event) {
-    var e = window.event || event;
-    if(e.preventDefault){
-        e.preventDefault();
-    }else{
-        window.event.returnValue = false;
+window.onkeydown = function(){
+        if (window.event.keyCode==32) {
+            event.returnValue=false;
+        }
     }
-}
 //绑定按键
 document.body.addEventListener("keydown",function(e){
     //播放按键声音
