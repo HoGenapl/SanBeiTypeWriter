@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SanBeiTypeWriter
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.3.1
 // @description  扇贝阅读打字记忆
 // @author       Hogen
 // @match        https://web.shanbay.com/reading/web-news/articles*
@@ -46,6 +46,11 @@ document.body.addEventListener("keydown",function(e){
     if(kd == 222)
     {
         kd = 39;
+    }
+    //转换横杠
+    else if(kd == 189)
+    {
+        kd = 45;
     }
     if((cc_p <= cc.length) && (kd == cc[cc_p].innerText.toUpperCase().charCodeAt(0)))
     {
