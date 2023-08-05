@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SanBeiTypeWriter
 // @namespace    http://tampermonkey.net/
-// @version      0.5.1
+// @version      0.5.2
 // @description  扇贝阅读打字记忆 见https://github.com/HoGenapl/SanBeiTypeWriter
 // @author       Hogen
 // @match        https://web.shanbay.com/reading/web-news/articles*
@@ -188,48 +188,57 @@ function init_enlarge_font()
 }
 function init_transform_words(word)
 {
-            //单词数量
-            console.log("words:",word.length);
-            for(var i=0,len = word.length;i<len;i++)
-            {
-                //console.log(word[i]);
+    //单词数量
+    console.log("words:",word.length);
+    for(var i=0,len = word.length;i<len;i++)
+    {
+        //console.log(word[i]);
 
-                //开始转换,将单词转换为单个的元素
-                let a = word[i];
-                let b = a.innerText;
-                //console.log(a.innerText);
-                //清除内容
-                a.innerText = '';
-                for(var j in b)
-                {
-                    //console.log(b[j]);
-                    var e = document.createElement("span");
-                    e.innerText = b[j];
-                    e.style.color="blue";
-                    e.setAttribute("class","wds");
-                    a.appendChild(e);
-                }
-                //最后添加一个不可见的空格
-                e = document.createElement("span");
-                e.innerText = " ";
-                e.setAttribute("class","wds");
-                e.setAttribute("style","display:none");
-                a.appendChild(e);
-            }
-            //获取所有的转换完的字符标签
-            //
-            cc = document.getElementsByClassName("wds");
+        //开始转换,将单词转换为单个的元素
+        let a = word[i];
+        let b = a.innerText;
+        //console.log(a.innerText);
+        //清除内容
+        a.innerText = '';
+        for(var j in b)
+        {
+            //console.log(b[j]);
+            var e = document.createElement("span");
+            e.innerText = b[j];
+            e.style.color="blue";
+            e.setAttribute("class","wds");
+            a.appendChild(e);
+        }
+        //最后添加一个不可见的空格
+        e = document.createElement("span");
+        e.innerText = " ";
+        e.setAttribute("class","wds");
+        e.setAttribute("style","display:none");
+        a.appendChild(e);
+    }
+    //获取所有的转换完的字符标签
+    //
+    cc = document.getElementsByClassName("wds");
 }
 //***
 //***^^^程序从这开始
-//先隐藏文章等待初始化完毕
-document.getElementsByClassName("app-main")[0].style.display="none";
+
 //初始化开始
 document.onreadystatechange = function() {
     if (document.readyState == "complete"){
-        //异步,防止Dom元素未出现
+
         var start_timer = setInterval(function(word){
+            //异步,防止Dom元素未出现
+            //先隐藏文章等待初始化完毕
+            //如果是短文首页不隐藏
+            //console.log(window.location.href);
+            if(window.location.href != "https://web.shanbay.com/reading/web-news/articles")
+            {
+                document.getElementsByClassName("app-main")[0].style.display="none";
+            }
+
             word = document.getElementsByClassName("word");
+
             if(word.length != 0 && init_delete1() && init_delete2() && init_enlarge_font() && set_sounds())
             {
                 clearInterval(start_timer);
@@ -237,6 +246,8 @@ document.onreadystatechange = function() {
                 init_transform_words(word);
                 //显示文章
                 document.getElementsByClassName("app-main")[0].style.display="block";
+                //滚轮移动到最顶部
+                document.body.scrollTop=document.documentElement.scrollTop=0
                 console.log("初始化完毕");
             }
 
