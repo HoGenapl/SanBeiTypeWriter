@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SanBeiTypeWriter
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.5
 // @description  扇贝阅读打字记忆 见https://github.com/HoGenapl/SanBeiTypeWriter
 // @author       Hogen
 // @match        https://web.shanbay.com/reading/web-news/articles*
@@ -15,6 +15,9 @@ var sound_switch = true;
 //2.单词声音是否开启
 var sound_word = true;
 
+
+//是否打开了评论
+var dkpl_gban = false;
 //朗读单词辅助变量
 var r_volume_words = true;
 //转换完的字符标签
@@ -43,7 +46,7 @@ document.body.addEventListener("keydown",function(e){
     {
         click.play();
     }
-    console.log(cc_p <= cc.length,"_键盘按键码:_",e.keyCode,"_需要按下的字符码:_",cc[cc_p].innerText.toUpperCase().charCodeAt(0))
+    //console.log("是否达到末尾",!(cc_p <= cc.length),"_键盘按键码:_",e.keyCode,"_需要按下的字符码:_",cc[cc_p].innerText.toUpperCase().charCodeAt(0))
     var kd = e.keyCode
     //转换单引号
     if(kd == 222)
@@ -75,28 +78,51 @@ document.body.addEventListener("keydown",function(e){
         }
         cc_p = cc_p + 1;
     }
-    else if(sound_switch == true)//如果按错了播放提示音
+    //如果按下的是回车打开当前段落的评论
+    else if(13 == kd)
+    {
+        if(dkpl_gban == false)//打开评论
+        {
+            cc[cc_p].parentNode.parentNode.parentNode.parentNode.getElementsByTagName("a")[0].click();
+            dkpl_gban = true;
+        }
+        else{
+            document.getElementsByClassName("notes-close-btn")[0].click();
+            cc[cc_p+1].parentNode.click();
+            dkpl_gban = false;
+        }
+
+    }
+    //如果按下的是ESC键则关闭评论
+    else if(27 == kd)
+    {
+        document.getElementsByClassName("notes-close-btn")[0].click();
+        dkpl_gban = false;
+    }
+    //如果按错了播放提示音
+    else if(sound_switch == true)
     {
         click2.play();
         //如果按错了,再播放一次单词声音
         if(sound_word == true)
         {
             r_volume_words = true;
-            console.log("ee");
         }
     }
-    //console.log(cc_p,"__",cc.length);
     //播放单词声音
     if(sound_word == true)
     {
         //点开单词详解
-        cc[cc_p+1].parentNode.click();
-        console.log("r_volume_words",r_volume_words);
-        //点击播放声音
-        if(r_volume_words == true)
+        //如果是回车键则不打开单词详解,也不播放声音
+        if(kd != 13)
         {
-            document.getElementsByClassName("volume")[0].click();
-            console.log(r_volume_words);
+            cc[cc_p+1].parentNode.click();
+
+            //点击播放声音
+            if(r_volume_words == true)
+            {
+                document.getElementsByClassName("volume")[0].click();
+            }
         }
     }
 

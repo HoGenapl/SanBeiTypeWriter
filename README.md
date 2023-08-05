@@ -3,6 +3,8 @@
 
 请将SanBeiTypeWriter.user.js里面的内容复制到油猴脚本中使用
 
+按Enter键打开评论,再次按下Enter键或Esc键关闭评论继续打字
+
 打字声音请在sound_switch中设置,为true 或false
 
 单词声音请在sound_word中设置,为true 或false
