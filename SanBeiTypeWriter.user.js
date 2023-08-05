@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SanBeiTypeWriter
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      0.5.1
 // @description  扇贝阅读打字记忆 见https://github.com/HoGenapl/SanBeiTypeWriter
 // @author       Hogen
 // @match        https://web.shanbay.com/reading/web-news/articles*
@@ -15,7 +15,8 @@ var sound_switch = true;
 //2.单词声音是否开启
 var sound_word = true;
 
-
+//单词数量
+var ward;
 //是否打开了评论
 var dkpl_gban = false;
 //朗读单词辅助变量
@@ -25,129 +26,168 @@ var cc;
 //当前的字符指针位置
 var cc_p=0;
 //设置打字音
-//添加音频文件1
-const click = new Audio("https://raw.githubusercontent.com/HoGenapl/SanBeiTypeWriter/main/click.wav");
-//click.loop = true;
-click.type = "audio/wav";
-//添加音频文件2
-const click2 = new Audio("https://raw.githubusercontent.com/HoGenapl/SanBeiTypeWriter/main/beep.wav");
-//click.loop = true;
-click2.type = "audio/wav";
+//音频文件1
+var click;
+//音频文件2
+var click2;
+
 //禁止空格下滑页面
 window.onkeydown = function(){
     if (window.event.keyCode==32) {
         event.returnValue=false;
     }
 }
+//设置打字音
+function set_sounds()
+{
+    try
+    {
+        click = new Audio("https://raw.githubusercontent.com/HoGenapl/SanBeiTypeWriter/main/click.wav");
+        //click.loop = true;
+        click.type = "audio/wav";
+        click2 = new Audio("https://raw.githubusercontent.com/HoGenapl/SanBeiTypeWriter/main/beep.wav");
+        //click.loop = true;
+        click2.type = "audio/wav";
+        return true;
+    }
+    catch(e)
+    {
+        return set_sounds();
+    }
+}
+
 //绑定按键
-document.body.addEventListener("keydown",function(e){
-    //播放按键声音
-    if(sound_switch == true)
-    {
-        click.play();
-    }
-    //console.log("是否达到末尾",!(cc_p <= cc.length),"_键盘按键码:_",e.keyCode,"_需要按下的字符码:_",cc[cc_p].innerText.toUpperCase().charCodeAt(0))
-    var kd = e.keyCode
-    //转换单引号
-    if(kd == 222)
-    {
-        kd = 39;
-    }
-    //转换横杠
-    else if(kd == 189)
-    {
-        kd = 45;
-    }
-    if((cc_p <= cc.length) && (kd == cc[cc_p].innerText.toUpperCase().charCodeAt(0)))
-    {
-        cc[cc_p].style.color="red";
-        //如果下一个是空格
-        if(cc[cc_p + 1].innerText == " ")
+function bind_keys()
+{
+    document.body.addEventListener("keydown",function(e){
+        //播放按键声音
+        if(sound_switch == true)
         {
-            cc[cc_p].style.color="black";
+            click.play();
         }
-        //如果是空格,表示下一个是新单词;
-        if(cc[cc_p].innerText == " ")
+        //console.log("是否达到末尾",!(cc_p <= cc.length),"_键盘按键码:_",e.keyCode,"_需要按下的字符码:_",cc[cc_p].innerText.toUpperCase().charCodeAt(0))
+        var kd = e.keyCode
+        //转换单引号
+        if(kd == 222)
         {
-            r_volume_words = true;
-            cc[cc_p - 1].style.color="red";
+            kd = 39;
         }
-        else
+        //转换横杠
+        else if(kd == 189)
         {
-            r_volume_words = false;
+            kd = 45;
         }
-        cc_p = cc_p + 1;
-    }
-    //如果按下的是回车打开当前段落的评论
-    else if(13 == kd)
-    {
-        if(dkpl_gban == false)//打开评论
+        if((cc_p <= cc.length) && (kd == cc[cc_p].innerText.toUpperCase().charCodeAt(0)))
         {
-            cc[cc_p].parentNode.parentNode.parentNode.parentNode.getElementsByTagName("a")[0].click();
-            dkpl_gban = true;
+            cc[cc_p].style.color="red";
+            //如果下一个是空格
+            if(cc[cc_p + 1].innerText == " ")
+            {
+                cc[cc_p].style.color="black";
+            }
+            //如果是空格,表示下一个是新单词;
+            if(cc[cc_p].innerText == " ")
+            {
+                r_volume_words = true;
+                cc[cc_p - 1].style.color="red";
+            }
+            else
+            {
+                r_volume_words = false;
+            }
+            cc_p = cc_p + 1;
         }
-        else{
+        //如果按下的是回车打开当前段落的评论
+        else if(13 == kd)
+        {
+            if(dkpl_gban == false)//打开评论
+            {
+                cc[cc_p].parentNode.parentNode.parentNode.parentNode.getElementsByTagName("a")[0].click();
+                dkpl_gban = true;
+            }
+            else{
+                document.getElementsByClassName("notes-close-btn")[0].click();
+                cc[cc_p+1].parentNode.click();
+                dkpl_gban = false;
+            }
+
+        }
+        //如果按下的是ESC键则关闭评论
+        else if(27 == kd)
+        {
             document.getElementsByClassName("notes-close-btn")[0].click();
-            cc[cc_p+1].parentNode.click();
             dkpl_gban = false;
         }
-
-    }
-    //如果按下的是ESC键则关闭评论
-    else if(27 == kd)
-    {
-        document.getElementsByClassName("notes-close-btn")[0].click();
-        dkpl_gban = false;
-    }
-    //如果按错了播放提示音
-    else if(sound_switch == true)
-    {
-        click2.play();
-        //如果按错了,再播放一次单词声音
+        //如果按错了播放提示音
+        else if(sound_switch == true)
+        {
+            click2.play();
+            //如果按错了,再播放一次单词声音
+            if(sound_word == true)
+            {
+                r_volume_words = true;
+            }
+        }
+        //播放单词声音
         if(sound_word == true)
         {
-            r_volume_words = true;
-        }
-    }
-    //播放单词声音
-    if(sound_word == true)
-    {
-        //点开单词详解
-        //如果是回车键则不打开单词详解,也不播放声音
-        if(kd != 13)
-        {
-            cc[cc_p+1].parentNode.click();
-
-            //点击播放声音
-            if(r_volume_words == true)
+            //点开单词详解
+            //如果是回车键则不打开单词详解,也不播放声音
+            if(kd != 13)
             {
-                document.getElementsByClassName("volume")[0].click();
+                cc[cc_p+1].parentNode.click();
+
+                //点击播放声音
+                if(r_volume_words == true)
+                {
+                    document.getElementsByClassName("volume")[0].click();
+                }
             }
         }
-    }
 
-});
+    });
+}
 
-document.onreadystatechange = function() {
-    if (document.readyState == "complete"){
-        //等待1秒,防止Dom元素未出现
-        //***一下是一些我个人的调整用的舒服一点哈~***
-        //删除部分内容
-        //删除阅读栏右边内容
+//***一下是一些我个人的调整用的舒服一点哈~***
+//删除部分内容
+//删除阅读栏右边内容
+function init_delete1()
+{
+    try{
         document.getElementsByClassName("pull-right")[0].parentNode.removeChild(document.getElementsByClassName("pull-right")[0]);
-        //去除阅读内容的width
+        return true;
+    }
+    catch(e)
+    {
+        return init_delete1();
+    }
+}
+//去除阅读内容的width
+function init_delete2()
+{
+    try{
         document.getElementsByClassName("pull-left")[0].style.setProperty('width', 'initial');
-        //放大字体
+        return true;
+    }
+    catch(e)
+    {
+        return init_delete2();
+    }
+}
+//放大字体
+function init_enlarge_font()
+{
+    try{
         document.getElementsByClassName("article-content")[0].style.setProperty("font-size","20px");
-
-        //***
-
-        var start_timer = setInterval(function(){
-            let word = document.getElementsByClassName("word");
-            if(word.length != 0)
-            {
-                clearInterval(start_timer);
-            }
+        return true;
+    }
+    catch(e)
+    {
+        return init_enlarge_font();
+    }
+}
+function init_transform_words(word)
+{
             //单词数量
             console.log("words:",word.length);
             for(var i=0,len = word.length;i<len;i++)
@@ -179,9 +219,30 @@ document.onreadystatechange = function() {
             //获取所有的转换完的字符标签
             //
             cc = document.getElementsByClassName("wds");
+}
+//***
+//***^^^程序从这开始
+//先隐藏文章等待初始化完毕
+document.getElementsByClassName("app-main")[0].style.display="none";
+//初始化开始
+document.onreadystatechange = function() {
+    if (document.readyState == "complete"){
+        //异步,防止Dom元素未出现
+        var start_timer = setInterval(function(word){
+            word = document.getElementsByClassName("word");
+            if(word.length != 0 && init_delete1() && init_delete2() && init_enlarge_font() && set_sounds())
+            {
+                clearInterval(start_timer);
+                bind_keys();
+                init_transform_words(word);
+                //显示文章
+                document.getElementsByClassName("app-main")[0].style.display="block";
+                console.log("初始化完毕");
+            }
+
 
 
         }
-                                      ,100);
+                                      ,500);
     }
 };
