@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SanBeiTypeWriter
 // @namespace    http://tampermonkey.net/
-// @version      0.3.1
-// @description  扇贝阅读打字记忆
+// @version      0.4
+// @description  扇贝阅读打字记忆 见https://github.com/HoGenapl/SanBeiTypeWriter
 // @author       Hogen
 // @match        https://web.shanbay.com/reading/web-news/articles*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=shanbay.com
@@ -12,8 +12,11 @@
 //设置
 //1.打字声音是否开启
 var sound_switch = true;
+//2.单词声音是否开启
+var sound_word = true;
 
-
+//朗读单词辅助变量
+var r_volume_words = true;
 //转换完的字符标签
 var cc;
 //当前的字符指针位置
@@ -40,7 +43,7 @@ document.body.addEventListener("keydown",function(e){
     {
         click.play();
     }
-    console.log(cc_p <= cc.length,"__",e.keyCode,"__",cc[cc_p].innerText.toUpperCase().charCodeAt(0))
+    console.log(cc_p <= cc.length,"_键盘按键码:_",e.keyCode,"_需要按下的字符码:_",cc[cc_p].innerText.toUpperCase().charCodeAt(0))
     var kd = e.keyCode
     //转换单引号
     if(kd == 222)
@@ -55,29 +58,64 @@ document.body.addEventListener("keydown",function(e){
     if((cc_p <= cc.length) && (kd == cc[cc_p].innerText.toUpperCase().charCodeAt(0)))
     {
         cc[cc_p].style.color="red";
+        //如果下一个是空格
+        if(cc[cc_p + 1].innerText == " ")
+        {
+            cc[cc_p].style.color="black";
+        }
+        //如果是空格,表示下一个是新单词;
+        if(cc[cc_p].innerText == " ")
+        {
+            r_volume_words = true;
+            cc[cc_p - 1].style.color="red";
+        }
+        else
+        {
+            r_volume_words = false;
+        }
         cc_p = cc_p + 1;
     }
     else if(sound_switch == true)//如果按错了播放提示音
     {
         click2.play();
+        //如果按错了,再播放一次单词声音
+        if(sound_word == true)
+        {
+            r_volume_words = true;
+            console.log("ee");
+        }
     }
-    console.log(cc_p,"__",cc.length);
+    //console.log(cc_p,"__",cc.length);
+    //播放单词声音
+    if(sound_word == true)
+    {
+        //点开单词详解
+        cc[cc_p+1].parentNode.click();
+        console.log("r_volume_words",r_volume_words);
+        //点击播放声音
+        if(r_volume_words == true)
+        {
+            document.getElementsByClassName("volume")[0].click();
+            console.log(r_volume_words);
+        }
+    }
 
 });
-//***一下是一些我个人的调整用的舒服一点哈~***
-//删除部分内容
-//删除阅读栏右边内容
-document.getElementsByClassName("pull-right")[0].parentNode.removeChild(document.getElementsByClassName("pull-right")[0]);
-//去除阅读内容的width
-document.getElementsByClassName("pull-left")[0].style.setProperty('width', 'initial');
-//放大字体
-document.getElementsByClassName("article-content")[0].style.setProperty("font-size","20px");
-
-//***
 
 document.onreadystatechange = function() {
     if (document.readyState == "complete"){
         //等待1秒,防止Dom元素未出现
+        //***一下是一些我个人的调整用的舒服一点哈~***
+        //删除部分内容
+        //删除阅读栏右边内容
+        document.getElementsByClassName("pull-right")[0].parentNode.removeChild(document.getElementsByClassName("pull-right")[0]);
+        //去除阅读内容的width
+        document.getElementsByClassName("pull-left")[0].style.setProperty('width', 'initial');
+        //放大字体
+        document.getElementsByClassName("article-content")[0].style.setProperty("font-size","20px");
+
+        //***
+
         var start_timer = setInterval(function(){
             let word = document.getElementsByClassName("word");
             if(word.length != 0)
@@ -118,6 +156,6 @@ document.onreadystatechange = function() {
 
 
         }
-                   ,100);
+                                      ,100);
     }
 };

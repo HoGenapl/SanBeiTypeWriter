@@ -3,7 +3,9 @@
 
 请将SanBeiTypeWriter.user.js里面的内容复制到油猴脚本中使用
 
-按键声音请在sound_switch中设置,为true 或false
+打字声音请在sound_switch中设置,为true 或false
+
+单词声音请在sound_word中设置,为true 或false
 
 可打字的单词会变蓝色
 
