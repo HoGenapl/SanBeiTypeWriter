@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SanBeiTypeWriter
 // @namespace    http://tampermonkey.net/
-// @version      0.5.2
+// @version      0.5.3
 // @description  扇贝阅读打字记忆 见https://github.com/HoGenapl/SanBeiTypeWriter
 // @author       Hogen
 // @match        https://web.shanbay.com/reading/web-news/articles*
@@ -67,17 +67,18 @@ function bind_keys()
         }
         //console.log("是否达到末尾",!(cc_p <= cc.length),"_键盘按键码:_",e.keyCode,"_需要按下的字符码:_",cc[cc_p].innerText.toUpperCase().charCodeAt(0))
         var kd = e.keyCode
-        //转换单引号
-        if(kd == 222)
-        {
-            kd = 39;
-        }
+        //$$(抛弃)转换单引号
+        //if(kd == 222)
+        //{
+        //    kd = 39;
+        //}
         //转换横杠
-        else if(kd == 189)
+        if(kd == 189)
         {
             kd = 45;
         }
-        if((cc_p <= cc.length) && (kd == cc[cc_p].innerText.toUpperCase().charCodeAt(0)))
+		//如果按下的是单引号则跳过...
+        if((kd == 222) || (cc_p <= cc.length) && (kd == cc[cc_p].innerText.toUpperCase().charCodeAt(0)))
         {
             cc[cc_p].style.color="red";
             //如果下一个是空格
